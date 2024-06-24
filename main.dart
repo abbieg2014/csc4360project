@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Import package for date formatting
 import 'package:charts_flutter/flutter.dart' as charts; // Import package for bar chart
+// import 'database_helper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -183,16 +184,17 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildMainContent() {
     switch (_selectedItem) {
-      case 'Dashboard':
-        return const Center(child: Text('DASHBOARD'));
+      case 'Income':
+        return const Center(child: Text('INCOME'));
       case 'Spending':
         Map<DateTime, double> dailySpendingData = calculateDailySpending(_transactionItems);
         List<charts.Series<TimeSeriesSales, String>> chartData = generateChartData(dailySpendingData);
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              height: 200, // Adjust the height as needed
+            SizedBox(
+              height: 200,
+              width: 200,
               child: charts.BarChart(
                 chartData,
                 animate: true,
@@ -288,10 +290,10 @@ class _HomePageState extends State<HomePage> {
                   children: <Widget>[
                     ListTile(
                       title: Text(
-                        'Dashboard',
+                        'Income',
                         style: TextStyle(color: _isDarkMode ? Colors.white : Colors.black),
                       ),
-                      onTap: () => _selectItem('Dashboard'),
+                      onTap: () => _selectItem('Income'),
                     ),
                     ListTile(
                       title: Text(
