@@ -48,59 +48,63 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Transaction'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('Add Transaction'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Name'),
+                  ),
+                  TextField(
+                    controller: amountController,
+                    decoration: const InputDecoration(labelText: 'Amount'),
+                    keyboardType: TextInputType.number,
+                  ),
+                  DropdownButton<String>(
+                    value: dropdownValue,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropdownValue = newValue!;
+                      });
+                    },
+                    items: <String>[
+                      'Entertainment',
+                      'Food',
+                      'Rent',
+                      'Utilities',
+                      'Others',
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
-              TextField(
-                controller: amountController,
-                decoration: const InputDecoration(labelText: 'Amount'),
-                keyboardType: TextInputType.number,
-              ),
-              DropdownButton<String>(
-                value: dropdownValue,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    dropdownValue = newValue!;
-                  });
-                },
-                items: <String>[
-                  'Entertainment',
-                  'Food',
-                  'Rent',
-                  'Utilities',
-                  'Others',
-                ].map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                String name = nameController.text;
-                double amount = double.tryParse(amountController.text) ?? 0.0;
-                _addTransaction(name, amount, dropdownValue);
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    String name = nameController.text;
+                    double amount = double.tryParse(amountController.text) ?? 0.0;
+                    _addTransaction(name, amount, dropdownValue);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -160,15 +164,14 @@ class _HomePageState extends State<HomePage> {
               alignment: Alignment.bottomRight,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
+                child: FloatingActionButton(
                   onPressed: _showAddTransactionDialog,
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Add Transaction'),
-                        SizedBox(width: 8),
+                        Text('+'),
                       ],
                     ),
                   ),
@@ -203,7 +206,7 @@ class _HomePageState extends State<HomePage> {
       body: Row(
         children: <Widget>[
           SizedBox(
-            width: _isSidebarOpen ? MediaQuery.of(context).size.width * 0.25 : 0,
+            width: _isSidebarOpen ? MediaQuery.of(context).size.width * 0.3 : 0,
             child: Visibility(
               visible: _isSidebarOpen,
               child: Container(
