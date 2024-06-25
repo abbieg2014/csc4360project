@@ -1,83 +1,6 @@
 import 'package:flutter/material.dart';
-import 'login.dart';
-import 'register.dart';
-import 'database_helper.dart';
-import 'package:intl/intl.dart'; // Import package for date formatting
-import 'package:charts_flutter/flutter.dart' as charts; // Import package for bar chart
-
-void main() {
-  runApp(const MyApp());
-}
-
-Map<DateTime, double> calculateDailySpending(List<TransactionItem> items) {
-  Map<DateTime, double> dailySpending = {};
-
-  for (var item in items) {
-    DateTime date = item.dateAdded;
-    double amount = item.amount;
-
-    DateTime truncatedDate = DateTime(date.year, date.month, date.day);
-
-    dailySpending.update(truncatedDate, (value) => value + amount,
-        ifAbsent: () => amount);
-  }
-
-  return dailySpending;
-}
-
-List<charts.Series<TimeSeriesSales, String>> generateChartData(
-    Map<DateTime, double> data) {
-  List<TimeSeriesSales> chartData = [];
-  data.forEach((key, value) {
-    String formattedDate = DateFormat('yyyy-MM-dd').format(key);
-    chartData.add(TimeSeriesSales(formattedDate, value));
-  });
-
-  return [
-    charts.Series<TimeSeriesSales, String>(
-      id: 'Sales',
-      colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-      domainFn: (TimeSeriesSales sales, _) => sales.time,
-      measureFn: (TimeSeriesSales sales, _) => sales.sales,
-      data: chartData,
-    ),
-  ];
-}
-
-class TimeSeriesSales {
-  final String time;
-  final double sales;
-
-  TimeSeriesSales(this.time, this.sales);
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      home: const LoginScreen(),
-    );
-  }
-}
-
-class TransactionItem {
-  final String name;
-  final double amount;
-  final String type;
-  final DateTime dateAdded; // Added date property
-
-  TransactionItem({
-    required this.name,
-    required this.amount,
-    required this.type,
-    required this.dateAdded, // Added date parameter
-  });
-}
+import 'package:intl/intl.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -112,7 +35,6 @@ class _HomePageState extends State<HomePage> {
 
   void _addTransaction(String name, double amount, String type) {
     setState(() {
-      // Get the current date and time
       DateTime now = DateTime.now();
       _transactionItems.add(TransactionItem(name: name, amount: amount, type: type, dateAdded: now));
     });
@@ -121,7 +43,7 @@ class _HomePageState extends State<HomePage> {
   void _showAddTransactionDialog() {
     TextEditingController nameController = TextEditingController();
     TextEditingController amountController = TextEditingController();
-    String dropdownValue = 'Entertainment'; // Default value
+    String dropdownValue = 'Entertainment';
 
     showDialog(
       context: context,
@@ -207,7 +129,6 @@ class _HomePageState extends State<HomePage> {
               child: ListView.builder(
                 itemCount: _transactionItems.length,
                 itemBuilder: (context, index) {
-                  // Format date
                   String formattedDate = DateFormat('yyyy-MM-dd').format(_transactionItems[index].dateAdded);
                   return ListTile(
                     title: Text(
@@ -224,7 +145,6 @@ class _HomePageState extends State<HomePage> {
                         IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
-                            // Add delete functionality here
                             setState(() {
                               _transactionItems.removeAt(index);
                             });
@@ -326,4 +246,60 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+class TransactionItem {
+  final String name;
+  final double amount;
+  final String type;
+  final DateTime dateAdded;
+
+  TransactionItem({
+    required this.name,
+    required this.amount,
+    required this.type,
+    required this.dateAdded,
+  });
+}
+
+Map<DateTime, double> calculateDailySpending(List<TransactionItem> items) {
+  Map<DateTime, double> dailySpending = {};
+
+  for (var item in items) {
+    DateTime date = item.dateAdded;
+    double amount = item.amount;
+
+    DateTime truncatedDate = DateTime(date.year, date.month, date.day);
+
+    dailySpending.update(truncatedDate, (value) => value + amount,
+        ifAbsent: () => amount);
+  }
+
+  return dailySpending;
+}
+
+List<charts.Series<TimeSeriesSales, String>> generateChartData(
+    Map<DateTime, double> data) {
+  List<TimeSeriesSales> chartData = [];
+  data.forEach((key, value) {
+    String formattedDate = DateFormat('yyyy-MM-dd').format(key);
+    chartData.add(TimeSeriesSales(formattedDate, value));
+  });
+
+  return [
+    charts.Series<TimeSeriesSales, String>(
+      id: 'Sales',
+      colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+      domainFn: (TimeSeriesSales sales, _) => sales.time,
+      measureFn: (TimeSeriesSales sales, _) => sales.sales,
+      data: chartData,
+    ),
+  ];
+}
+
+class TimeSeriesSales {
+  final String time;
+  final double sales;
+
+  TimeSeriesSales(this.time, this.sales);
 }
