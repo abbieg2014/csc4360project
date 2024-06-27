@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'login.dart';
+import 'database_helper2.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,6 +16,20 @@ class _HomePageState extends State<HomePage> {
   bool _isSidebarOpen = false;
   String _selectedItem = 'Item 1';
   final List<TransactionItem> _transactionItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    final transactions = await DatabaseHelper().getTransactions();
+    setState(() {
+      _transactionItems.clear();
+      _transactionItems.addAll(transactions);
+    });
+  }
 
   void _toggleTheme() {
     setState(() {
@@ -33,11 +49,21 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _addTransaction(String name, double amount, String type) {
-    setState(() {
-      DateTime now = DateTime.now();
-      _transactionItems.add(TransactionItem(name: name, amount: amount, type: type, dateAdded: now));
-    });
+  void _addTransaction(String name, double amount, String type) async {
+    DateTime now = DateTime.now();
+    final transaction = TransactionItem(name: name, amount: amount, type: type, dateAdded: now);
+    await DatabaseHelper().insertTransaction(transaction);
+    _loadTransactions();
+  }
+
+  void _deleteTransaction(int id) async {
+    await DatabaseHelper().deleteTransaction(id);
+    _loadTransactions();
+  }
+
+  void _updateTransaction(TransactionItem transaction) async {
+    await DatabaseHelper().updateTransaction(transaction);
+    _loadTransactions();
   }
 
   void _showAddTransactionDialog() {
@@ -110,6 +136,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _logout() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const LoginScreen()), // Replace with your login screen
+    );
+  }
+
   Widget _buildMainContent() {
     switch (_selectedItem) {
       case 'Income':
@@ -149,9 +181,7 @@ class _HomePageState extends State<HomePage> {
                         IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
-                            setState(() {
-                              _transactionItems.removeAt(index);
-                            });
+                            _deleteTransaction(_transactionItems[index].id!);
                           },
                         ),
                       ],
@@ -201,12 +231,16 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(_isDarkMode ? Icons.wb_sunny : Icons.nightlight_round),
             onPressed: _toggleTheme,
           ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+          ),
         ],
       ),
       body: Row(
         children: <Widget>[
           SizedBox(
-            width: _isSidebarOpen ? MediaQuery.of(context).size.width * 0.3 : 0,
+            width: _isSidebarOpen ? MediaQuery.of(context).size.width * 0.35 : 0,
             child: Visibility(
               visible: _isSidebarOpen,
               child: Container(
@@ -252,17 +286,29 @@ class _HomePageState extends State<HomePage> {
 }
 
 class TransactionItem {
+  final int? id;  // Make id nullable
   final String name;
   final double amount;
   final String type;
   final DateTime dateAdded;
 
   TransactionItem({
+    this.id,
     required this.name,
     required this.amount,
     required this.type,
     required this.dateAdded,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'amount': amount,
+      'type': type,
+      'dateAdded': dateAdded.toIso8601String(),
+    };
+  }
 }
 
 Map<DateTime, double> calculateDailySpending(List<TransactionItem> items) {
@@ -274,15 +320,13 @@ Map<DateTime, double> calculateDailySpending(List<TransactionItem> items) {
 
     DateTime truncatedDate = DateTime(date.year, date.month, date.day);
 
-    dailySpending.update(truncatedDate, (value) => value + amount,
-        ifAbsent: () => amount);
+    dailySpending.update(truncatedDate, (value) => value + amount, ifAbsent: () => amount);
   }
 
   return dailySpending;
 }
 
-List<charts.Series<TimeSeriesSales, String>> generateChartData(
-    Map<DateTime, double> data) {
+List<charts.Series<TimeSeriesSales, String>> generateChartData(Map<DateTime, double> data) {
   List<TimeSeriesSales> chartData = [];
   data.forEach((key, value) {
     String formattedDate = DateFormat('yyyy-MM-dd').format(key);
