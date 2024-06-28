@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'homepage.dart';  // Import your TransactionItem model
+import 'transaction_utils.dart'; 
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -39,15 +39,17 @@ class DatabaseHelper {
   }
 
   Future<int> insertTransaction(TransactionItem transaction) async {
-    Database db = await database;
+    final db = await database;
     return await db.insert('transactions', transaction.toMap());
   }
 
   Future<List<TransactionItem>> getTransactions() async {
-    Database db = await database;
+    final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('transactions');
+
     return List.generate(maps.length, (i) {
       return TransactionItem(
+        id: maps[i]['id'],
         name: maps[i]['name'],
         amount: maps[i]['amount'],
         type: maps[i]['type'],
@@ -57,7 +59,7 @@ class DatabaseHelper {
   }
 
   Future<void> deleteTransaction(int id) async {
-    Database db = await database;
+    final db = await database;
     await db.delete(
       'transactions',
       where: 'id = ?',
@@ -66,23 +68,12 @@ class DatabaseHelper {
   }
 
   Future<void> updateTransaction(TransactionItem transaction) async {
-    Database db = await database;
+    final db = await database;
     await db.update(
       'transactions',
       transaction.toMap(),
       where: 'id = ?',
       whereArgs: [transaction.id],
     );
-  }
-}
-
-extension on TransactionItem {
-  Map<String, dynamic> toMap() {
-    return {
-      'name': name,
-      'amount': amount,
-      'type': type,
-      'dateAdded': dateAdded.toIso8601String(),
-    };
   }
 }
