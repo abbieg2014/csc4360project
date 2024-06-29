@@ -13,7 +13,7 @@ class IncomeAndExpensePage extends StatefulWidget {
 
 class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
   List<TransactionItem> _allTransactionItems = [];
-  bool _isDarkMode = false; 
+  final bool _isDarkMode = false; 
   String? _selectedType; 
 
   @override
@@ -125,7 +125,7 @@ class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
     return Column(
       children: [
         // Title for Income
-        Text("Income", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const Text("Income", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
 
         // Income Chart
         SizedBox(height: 200, child: charts.BarChart(incomeData, animate: true)),
@@ -169,7 +169,7 @@ class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
         ),
 
         // Title for Expenses
-        Text("Expenses", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const Text("Expenses", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
 
         // Expenses Chart
         SizedBox(height: 200, child: charts.BarChart(expenseData, animate: true)),

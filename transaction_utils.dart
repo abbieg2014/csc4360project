@@ -42,7 +42,15 @@ Map<DateTime, double> calculateDailyAmounts(List<TransactionItem> items, String 
   for (var item in items) {
     if (transactionType == "Income" && item.type != "Income") continue;
     if (transactionType == "Spending" && item.type == "Income") continue;
-    // ... (rest of the calculation logic remains the same) ...
+    DateTime date = item.dateAdded;
+    double amount = item.amount;
+
+    DateTime truncatedDate = DateTime(date.year, date.month, date.day);
+    dailyAmounts.update(
+      truncatedDate, 
+      (value) => value + amount, 
+      ifAbsent: () => amount
+    );
   }
 
   return dailyAmounts;
@@ -75,3 +83,27 @@ class TimeSeriesSales {
 
   TimeSeriesSales(this.time, this.sales);
 }
+
+class BudgetCategory {
+  final int? id;
+  final String name;
+  final double amount;
+
+  BudgetCategory({this.id, required this.name, required this.amount});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'amount': amount,
+    };
+  }
+}
+
+class BudgetSegment {
+  final String category;
+  final double amount;
+
+  BudgetSegment(this.category, this.amount);
+}
+

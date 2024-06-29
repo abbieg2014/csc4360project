@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'incomeandexpense.dart';
+import 'budgetinvesting.dart';  // Import the budget page
 import 'login.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key}); // Constructor
+  const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState(); 
+  _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   bool _isDarkMode = false;
   bool _isSidebarOpen = false;
-  String _selectedItem = 'Item 1'; 
+  String _selectedItem = 'Item 1'; // Could be 'Income/Spending' or 'Budget/Investing' initially
 
   @override
   void initState() {
@@ -39,10 +39,9 @@ class _HomePageState extends State<HomePage> {
 
     Widget page;
     if (item == 'Income/Spending') {
-      page = IncomeAndExpensePage(); 
+      page = const IncomeAndExpensePage(); 
     } else if (item == 'Budget/Investing') {
-      // Replace with  actual BudgetInvestingPage widget
-      page = const Center(child: Text('Budget/Investing Page'));  
+      page = const BudgetInvestingPage(); 
     } else {
       page = const Center(child: Text('No content'));
     }
@@ -55,8 +54,6 @@ class _HomePageState extends State<HomePage> {
       MaterialPageRoute(builder: (context) => const LoginScreen()), 
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +109,8 @@ class _HomePageState extends State<HomePage> {
             child: Container(
               color: _isDarkMode ? Colors.black : Colors.white,
               child: _selectedItem == 'Item 1' 
-                ? const Center(child: Text("Select Income or Spending from the sidebar"))
-                : Container(), 
+                ? const Center(child: Text("Select from the sidebar"))
+                : Container(), // Empty container when not on the default page
             ),
           ),
         ],
@@ -121,4 +118,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-

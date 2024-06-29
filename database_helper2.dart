@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'transaction_utils.dart'; 
+import 'transaction_utils.dart'; // Import for TransactionItem and BudgetCategory
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -9,7 +9,7 @@ class DatabaseHelper {
 
   DatabaseHelper._internal();
 
-  Database? _database;
+  static Database? _database;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -21,12 +21,25 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'transactions.db');
     return await openDatabase(
       path,
-      version: 1,
-      onCreate: _onCreate,
+      version: 2,
+      onCreate: (db, version) async {
+        try{
+        await _createTransactionsTable(db); 
+        await _createBudgetCategoriesTable(db); 
+        } catch (e) {
+        print('Error creating tables: $e');
+        }
+      },
+       onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {  // Check for previous version
+          await _createBudgetCategoriesTable(db);
+        }
+        // Add more upgrade logic for future versions if needed
+      },
     );
   }
 
-  Future<void> _onCreate(Database db, int version) async {
+  Future<void> _createTransactionsTable(Database db) async {
     await db.execute('''
       CREATE TABLE transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,6 +47,16 @@ class DatabaseHelper {
         amount REAL,
         type TEXT,
         dateAdded TEXT
+      )
+    ''');
+  }
+
+  Future<void> _createBudgetCategoriesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE budget_categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        amount REAL
       )
     ''');
   }
@@ -75,5 +98,24 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [transaction.id],
     );
+  }
+
+  // Budget Category Methods
+  Future<int> addBudgetCategory(String name, double amount) async {
+    final db = await database;
+    return await db.insert('budget_categories', {'name': name, 'amount': amount});
+  }
+
+  Future<List<BudgetCategory>> getBudgetCategories() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('budget_categories');
+
+    return List.generate(maps.length, (i) {
+      return BudgetCategory(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        amount: maps[i]['amount'],
+      );
+    });
   }
 }
