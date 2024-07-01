@@ -54,7 +54,7 @@ class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
   void _showAddTransactionDialog() {
     TextEditingController nameController = TextEditingController();
     TextEditingController amountController = TextEditingController();
-    _selectedType = null;  // Reset selected type when dialog opens
+    _selectedType = null; // Reset selected type when dialog opens
     
     showDialog(
       context: context,
@@ -116,6 +116,76 @@ class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
     );
   }
 
+  void _showEditTransactionDialog(TransactionItem transaction) {
+    TextEditingController nameController = TextEditingController(text: transaction.name);
+    TextEditingController amountController = TextEditingController(text: transaction.amount.toString());
+    _selectedType = transaction.type; 
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('Edit Transaction'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Name'),
+                  ),
+                  TextField(
+                    controller: amountController,
+                    decoration: const InputDecoration(labelText: 'Amount'),
+                    keyboardType: TextInputType.number,
+                  ),
+                  DropdownButton<String>(
+                    value: _selectedType,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedType = newValue!;
+                      });
+                    },
+                    items: <String>['Income', 'Entertainment', 'Food', 'Rent', 'Utilities', 'Others']
+                      .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    TransactionItem updatedTransaction = TransactionItem(
+                      id: transaction.id, // Use the transaction object passed to the dialog
+                      name: nameController.text,
+                      amount: double.tryParse(amountController.text) ?? 0.0,
+                      type: _selectedType!,
+                      dateAdded: transaction.dateAdded, // Preserve the original date
+                    );
+                    _updateTransaction(updatedTransaction);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+  
 
 
   Widget buildIncomeExpenseView(
@@ -152,7 +222,7 @@ class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
                     IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () {
-                        // TODO: Implement edit functionality (e.g., show dialog to edit transaction)
+                        _showEditTransactionDialog(item); 
                       },
                     ),
                     IconButton(
@@ -196,7 +266,7 @@ class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
                     IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () {
-                        // TODO: Implement edit functionality (e.g., show dialog to edit transaction)
+                        _showEditTransactionDialog(item); 
                       },
                     ),
                     IconButton(
