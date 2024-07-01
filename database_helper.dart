@@ -45,7 +45,7 @@ class DatabaseHelper {
     }
   }
 
-  Future<bool> authenticateUser(String username, String password) async {
+  Future<int?> authenticateUser(String username, String password) async {
     final db = await instance.database;
 
     final maps = await db.query(
@@ -55,6 +55,10 @@ class DatabaseHelper {
       whereArgs: [username, password],
     );
 
-    return maps.isNotEmpty;
+    if (maps.isNotEmpty) {
+      return maps.first['id'] as int;
+    } else {
+      return null;
+    }
   }
 }
