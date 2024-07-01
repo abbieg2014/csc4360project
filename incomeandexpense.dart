@@ -3,17 +3,21 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
 import 'database_helper2.dart';
 import 'transaction_utils.dart';
+import 'homepage.dart';
+import 'login.dart';
 
-class IncomeAndExpensePage extends StatefulWidget {
-  const IncomeAndExpensePage({super.key}); // Remove transactionType from the constructor
-
+class IncomeAndExpensePage extends StatefulWidget { 
+  final bool isDarkMode; 
+  const IncomeAndExpensePage({
+    super.key,
+    required this.isDarkMode,
+  });
   @override
   _IncomeAndExpensePageState createState() => _IncomeAndExpensePageState();
 }
 
 class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
   List<TransactionItem> _allTransactionItems = [];
-  final bool _isDarkMode = false; 
   String? _selectedType; 
 
   @override
@@ -238,13 +242,9 @@ class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
           ),
         ),
 
-        // Title for Expenses
         const Text("Expenses", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
 
-        // Expenses Chart
         SizedBox(height: 200, child: charts.BarChart(expenseData, animate: true)),
-
-        // List of Expense Transactions
         Expanded(
           child: ListView.builder(
             itemCount: _allTransactionItems.where((item) => item.type != "Income").length,
@@ -288,20 +288,48 @@ class _IncomeAndExpensePageState extends State<IncomeAndExpensePage> {
 
 
 
-  @override
+    @override
   Widget build(BuildContext context) {
-    final incomeData = generateChartData(calculateDailyIncome(_allTransactionItems));
-    final expenseData = generateChartData(calculateDailySpending(_allTransactionItems));
+    final incomeData =
+        generateChartData(calculateDailyIncome(_allTransactionItems));
+    final expenseData =
+        generateChartData(calculateDailySpending(_allTransactionItems));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Income & Spending'),
+        title: const Text('Personal Finance Manager'), 
+        leading: IconButton(
+          icon: const Icon(Icons.menu), 
+          onPressed: () {
+            Navigator.of(context).pop(widget.isDarkMode); 
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(widget.isDarkMode ? Icons.wb_sunny : Icons.nightlight_round),
+            onPressed: () {
+              Navigator.pop(context, !widget.isDarkMode); 
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => const LoginScreen(),
+                ),
+                (route) => false,
+              );
+            },
+          ),
+        ],
       ),
-      body: buildIncomeExpenseView(incomeData, expenseData, _isDarkMode),
+      body: buildIncomeExpenseView(incomeData, expenseData, widget.isDarkMode),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddTransactionDialog,
         child: const Icon(Icons.add),
       ),
     );
-  }
+  }     
 }

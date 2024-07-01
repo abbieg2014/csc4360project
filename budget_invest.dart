@@ -6,23 +6,27 @@ import 'database_helper3.dart';
 
 class BudgetPage extends StatefulWidget {
   final int userId;
+  final bool isDarkMode;
 
-  const BudgetPage({Key? key, required this.userId}) : super(key: key);
+  const BudgetPage({Key? key, required this.userId, required this.isDarkMode})
+      : super(key: key);
 
   @override
   _BudgetPageState createState() => _BudgetPageState();
 }
 
 class _BudgetPageState extends State<BudgetPage> {
-  bool _isDarkMode = false;
   bool _isSidebarOpen = false;
 
   final List<BudgetItem> _budgetItems = [];
   final List<InvestmentItem> _investmentItems = [];
   final TextEditingController _budgetAmountController = TextEditingController();
-  final TextEditingController _budgetDescriptionController = TextEditingController();
-  final TextEditingController _investmentAmountController = TextEditingController();
-  final TextEditingController _investmentDescriptionController = TextEditingController();
+  final TextEditingController _budgetDescriptionController =
+      TextEditingController();
+  final TextEditingController _investmentAmountController =
+      TextEditingController();
+  final TextEditingController _investmentDescriptionController =
+      TextEditingController();
   String _budgetType = 'Fixed';
   String _investmentType = 'Stocks';
 
@@ -34,26 +38,27 @@ class _BudgetPageState extends State<BudgetPage> {
 
   Future<void> _loadData() async {
     final budgetItems = await DatabaseHelper().getBudgetItems(widget.userId);
-    final investmentItems = await DatabaseHelper().getInvestmentItems(widget.userId);
+    final investmentItems =
+        await DatabaseHelper().getInvestmentItems(widget.userId);
 
     setState(() {
       _budgetItems.addAll(budgetItems.map((item) => BudgetItem(
-        id: item['id'],
-        userId: item['user_id'],
-        amount: item['amount'],
-        type: item['type'],
-        description: item['description'],
-        dateAdded: DateTime.parse(item['date_added']),
-      )));
+            id: item['id'],
+            userId: item['user_id'],
+            amount: item['amount'],
+            type: item['type'],
+            description: item['description'],
+            dateAdded: DateTime.parse(item['date_added']),
+          )));
 
       _investmentItems.addAll(investmentItems.map((item) => InvestmentItem(
-        id: item['id'],
-        userId: item['user_id'],
-        amount: item['amount'],
-        type: item['type'],
-        description: item['description'],
-        dateAdded: DateTime.parse(item['date_added']),
-      )));
+            id: item['id'],
+            userId: item['user_id'],
+            amount: item['amount'],
+            type: item['type'],
+            description: item['description'],
+            dateAdded: DateTime.parse(item['date_added']),
+          )));
     });
   }
 
@@ -68,8 +73,11 @@ class _BudgetPageState extends State<BudgetPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(_isDarkMode ? Icons.wb_sunny : Icons.nightlight_round),
-            onPressed: _toggleTheme,
+            icon: Icon(
+                widget.isDarkMode ? Icons.wb_sunny : Icons.nightlight_round), 
+            onPressed: () {
+               Navigator.pop(context, !widget.isDarkMode);
+            },
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -77,33 +85,42 @@ class _BudgetPageState extends State<BudgetPage> {
           ),
         ],
       ),
-      body: Row(
-        children: <Widget>[
-          SizedBox(
-            width: _isSidebarOpen ? MediaQuery.of(context).size.width * 0.35 : 0,
-            child: Visibility(
-              visible: _isSidebarOpen,
-              child: Container(
-                color: _isDarkMode ? Colors.grey[900] : Colors.grey[200],
-                child: _buildSidebar(context),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              color: _isDarkMode ? Colors.black : Colors.white,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    _buildBudgetSection(),
-                    _buildInvestmentSection(),
-                  ],
+      body: Theme(  
+        data: Theme.of(context).copyWith(
+          brightness: widget.isDarkMode ? Brightness.dark : Brightness.light, 
+        ),
+        child: Row(
+          children: <Widget>[
+            SizedBox(
+              width: _isSidebarOpen
+                  ? MediaQuery.of(context).size.width * 0.35
+                  : 0,
+              child: Visibility(
+                visible: _isSidebarOpen,
+                child: Container(
+                  color: widget.isDarkMode 
+                      ? Colors.grey[900]
+                      : Colors.grey[200],
+                  child: _buildSidebar(context),
                 ),
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Container(
+                color: widget.isDarkMode ? Colors.black : Colors.white, 
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      _buildBudgetSection(),
+                      _buildInvestmentSection(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -114,14 +131,9 @@ class _BudgetPageState extends State<BudgetPage> {
     });
   }
 
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  }
 
   void _logout() {
-    Navigator.of(context).pushReplacement(
+     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
@@ -199,15 +211,15 @@ class _BudgetPageState extends State<BudgetPage> {
                 return ListTile(
                   title: Text(
                     '${item.amount} - ${item.type}',
-                    style: TextStyle(color: _isDarkMode ? Colors.white : Colors.black),
+                    style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
                   ),
                   subtitle: Text(
                     '${item.description}\nAdded on: ${DateFormat('yyyy-MM-dd').format(item.dateAdded)}',
-                    style: TextStyle(color: _isDarkMode ? Colors.grey : Colors.black),
+                    style: TextStyle(color: widget.isDarkMode ? Colors.grey :Colors.black),
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    color: _isDarkMode ? Colors.white : Colors.black,
+                    color: widget.isDarkMode ? Colors.white : Colors.black,
                     onPressed: () => _deleteBudgetItem(index, item.id),
                   ),
                 );
@@ -304,15 +316,15 @@ class _BudgetPageState extends State<BudgetPage> {
                 return ListTile(
                   title: Text(
                     '${item.amount} - ${item.type}',
-                    style: TextStyle(color: _isDarkMode ? Colors.white : Colors.black),
+                    style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
                   ),
                   subtitle: Text(
                     '${item.description}\nAdded on: ${DateFormat('yyyy-MM-dd').format(item.dateAdded)}',
-                    style: TextStyle(color: _isDarkMode ? Colors.grey : Colors.black),
+                    style: TextStyle(color: widget.isDarkMode ? Colors.grey : Colors.black),
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    color: _isDarkMode ? Colors.white : Colors.black,
+                    color: widget.isDarkMode ? Colors.white : Colors.black,
                     onPressed: () => _deleteInvestmentItem(index, item.id),
                   ),
                 );

@@ -12,9 +12,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _isDarkMode = false;
+  bool _isDarkMode = false; // Initialize to false
   bool _isSidebarOpen = false;
-  String _selectedItem = 'Item 1'; // Could be 'Income/Spending' or 'Budget/Investing' initially
+  String _selectedItem = 'Item 1'; 
 
   @override
   void initState() {
@@ -34,23 +34,30 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _selectItem(String item) {
-    setState(() {
-      _selectedItem = item;
-    });
+  setState(() {
+    _selectedItem = item;
+  });
 
-    Widget page;
-    if (item == 'Income/Spending') {
-      page = const IncomeAndExpensePage(); 
-    } else if (item == 'Budget/Investing') {
-      page = (widget.userId != null)
-          ? BudgetPage(userId: widget.userId!)
-          : const Center(child: Text('Error: User ID not found'));
-    } else {
-      page = const Center(child: Text('No content'));
-    }
-
-    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+  Widget page;
+  if (item == 'Income/Spending') {
+    page = IncomeAndExpensePage(isDarkMode: _isDarkMode); 
+  } else if (item == 'Budget/Investing') {
+    page = (widget.userId != null)
+        ? BudgetPage(userId: widget.userId!, isDarkMode: _isDarkMode) 
+        : const Center(child: Text('Error: User ID not found'));
+  } else {
+    page = const Center(child: Text('No content'));
   }
+
+  Navigator.push(context, MaterialPageRoute(builder: (context) => page)).then((newIsDarkMode){ //Changed to Navigator.push
+    if (newIsDarkMode != null) {
+      setState(() {
+        _isDarkMode = newIsDarkMode;
+      });
+    }
+  });
+}
+
 
   void _logout() {
     Navigator.of(context).pushReplacement(
@@ -102,7 +109,6 @@ class _HomePageState extends State<HomePage> {
                       ),
                       onTap: () => _selectItem('Budget/Investing'),
                     ),
-                    // Add more ListTile widgets for other options if needed
                   ],
                 ),
               ),
@@ -113,8 +119,8 @@ class _HomePageState extends State<HomePage> {
               color: _isDarkMode ? Colors.black : Colors.white,
               child: _selectedItem == 'Item 1' 
                 ? const Center(child: Text("Select from the sidebar"))
-                : Container(), // Empty container when not on the default page
-            ),
+                : Container(), 
+          ),
           ),
         ],
       ),
