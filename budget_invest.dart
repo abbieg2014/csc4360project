@@ -203,7 +203,7 @@ class _BudgetPageState extends State<BudgetPage> {
                   ),
                   subtitle: Text(
                     '${item.description}\nAdded on: ${DateFormat('yyyy-MM-dd').format(item.dateAdded)}',
-                    style: TextStyle(color: _isDarkMode ? Colors.grey : Colors.black),
+                    style: TextStyle(color: _isDarkMode ? Colors.white : Colors.black),
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
@@ -268,7 +268,7 @@ class _BudgetPageState extends State<BudgetPage> {
                 const SizedBox(width: 8),
                 DropdownButton<String>(
                   value: _investmentType,
-                  items: <String>['Stocks', 'Bonds', 'Real Estate', 'Crypto'].map((String value) {
+                  items: <String>['Stocks', 'Bonds', 'Real Estate', 'Crypto', 'Other'].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -307,8 +307,8 @@ class _BudgetPageState extends State<BudgetPage> {
                     style: TextStyle(color: _isDarkMode ? Colors.white : Colors.black),
                   ),
                   subtitle: Text(
-                    '${item.description}\nAdded on: ${DateFormat('yyyy-MM-dd').format(item.dateAdded)}',
-                    style: TextStyle(color: _isDarkMode ? Colors.grey : Colors.black),
+                    '${item.description}\n${DateFormat('yyyy-MM-dd').format(item.dateAdded)}',
+                    style: TextStyle(color: _isDarkMode ? Colors.white : Colors.black),
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
