@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'incomeandexpense.dart';
-import 'budgetinvesting.dart';  // Import the budget page
 import 'login.dart';
+import 'budget_invest.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int userId;
+  const HomePage({super.key, required this.userId});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -41,7 +42,9 @@ class _HomePageState extends State<HomePage> {
     if (item == 'Income/Spending') {
       page = const IncomeAndExpensePage(); 
     } else if (item == 'Budget/Investing') {
-      page = const BudgetInvestingPage(); 
+      page = (widget.userId != null)
+          ? BudgetPage(userId: widget.userId!)
+          : const Center(child: Text('Error: User ID not found'));
     } else {
       page = const Center(child: Text('No content'));
     }

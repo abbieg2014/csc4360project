@@ -19,12 +19,13 @@ class _LoginScreenState extends State<LoginScreen> {
     String username = _usernameController.text;
     String password = _passwordController.text;
 
-    bool isAuthenticated = await _databaseHelper.authenticateUser(username, password);
-
-    if (isAuthenticated) {
+     int? userId = await _databaseHelper.authenticateUser(username, password);
+ 
+    if (userId != null) {
+      // If authentication is successful and userId is not null, navigate to HomePage
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(builder: (context) => HomePage(userId: userId)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
